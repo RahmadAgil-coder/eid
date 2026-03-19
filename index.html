@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selamat Idul Fitri 1447H</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Great+Vibes&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --emerald: #064e3b;
+            --soft-ivory: #fdfbf7;
+            --night-sky: #000000;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--soft-ivory);
+            color: #1e293b;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 1.5s ease;
+        }
+
+        #initial-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fdfbf7;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23d4af37' fill-opacity='0.05'%3E%3Cpath d='M40 0l10 30 30 10-30 10-10 30-10-30-30-10 30-10z'/%3E%3C/g%3E%3C/svg%3E");
+            z-index: 5;
+            transition: opacity 1s ease;
+        }
+
+        #night-scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--night-sky);
+            z-index: 40;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease;
+            overflow: hidden;
+        }
+
+        #sky-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #final-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        .card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            border-radius: 24px;
+            transform: scale(0.9) translateY(40px);
+            opacity: 0;
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+            display: none;
+            width: 92%;
+            max-width: 550px;
+        }
+
+        .card.active {
+            display: block;
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .shimmer-text {
+            background: linear-gradient(to right, #1e293b 20%, #D4AF37 40%, #D4AF37 60%, #1e293b 80%);
+            background-size: 200% auto;
+            color: #1e293b;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine { to { background-position: 200% center; } }
+
+        canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 60; 
+        }
+
+        .btn-elegant {
+            background: var(--emerald);
+            color: white;
+            padding: 1rem 3.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.3);
+            border: none;
+            position: relative;
+            z-index: 120;
+        }
+
+        .btn-elegant:hover { transform: scale(1.05); filter: brightness(1.1); }
+
+        .font-arabic { font-family: 'Cinzel Decorative', cursive; }
+        .font-cursive { font-family: 'Great Vibes', cursive; }
+
+        .moon {
+            position: absolute;
+            top: 10vh; right: 15%;
+            width: 50px; height: 50px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 30px white;
+        }
+        .moon::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 15px;
+            width: 100%; height: 100%;
+            background: #000;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="initial-bg"></div>
+    <div id="final-bg"></div>
+
+    <div id="night-scene">
+        <div id="sky-elements">
+            <div class="moon"></div>
+        </div>
+    </div>
+
+    <canvas id="fireworks-canvas"></canvas>
+
+    <div id="welcome-ui" class="text-center z-[110] relative transition-opacity duration-500">
+        <div class="mb-6 text-7xl animate-bounce">🕌</div>
+        <h2 class="text-sm tracking-[0.4em] text-slate-500 uppercase mb-10 font-semibold">Menyambut Idul Fitri</h2>
+        <button onclick="ignite()" class="btn-elegant">BUKA UCAPAN</button>
+    </div>
+
+    <div id="eid-card" class="card p-10 md:p-14 text-center">
+        <div class="relative z-10">
+            <h3 class="font-arabic text-4xl mb-2 shimmer-text">EID MUBARAK</h3>
+            <div class="text-[10px] tracking-[0.6em] text-emerald-700 font-bold mb-8">1447 HIJRIAH</div>
+            <div class="w-16 h-px bg-slate-200 mx-auto mb-8"></div>
+            <h4 class="font-cursive text-6xl text-emerald-900 mb-8">Selamat Idul Fitri</h4>
+            <p class="text-slate-500 italic leading-relaxed mb-10 text-lg">
+                "Di hari yang suci ini, mari kita bersihkan hati dan saling memaafkan setulus jiwa. Semoga kebahagiaan selalu menyertai setiap langkah kita."
+            </p>
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                <p class="text-[9px] uppercase tracking-widest text-emerald-600 mb-2 font-bold">Mohon Maaf Lahir & Batin</p>
+                <p class="text-2xl font-bold text-slate-800">Rahmad Agil Santoso & Keluarga</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isCelebrating = false;
+        const canvas = document.getElementById('fireworks-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x; this.y = y; this.color = color;
+                this.velocity = { 
+                    x: (Math.random() - 0.5) * (Math.random() * 12 + 4), 
+                    y: (Math.random() - 0.5) * (Math.random() * 12 + 4) 
+                };
+                this.alpha = 1; 
+                this.friction = 0.96; 
+                this.gravity = 0.15;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+            update() {
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
+                this.velocity.y += this.gravity;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= 0.01;
+            }
+        }
+
+        function createExplosion() {
+            if(!isCelebrating) return;
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * (canvas.height * 0.6);
+            const colors = ['#FFD700', '#FF4500', '#00FF7F', '#ffffff', '#FF69B4', '#1E90FF', '#ADFF2F'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 80; i++) particles.push(new Particle(x, y, color));
+        }
+
+        function renderLoop() {
+            if (!isCelebrating && particles.length === 0) return;
+            requestAnimationFrame(renderLoop);
+            
+            ctx.fillStyle = isCelebrating ? 'rgba(0, 0, 0, 0.2)' : 'transparent';
+            if (isCelebrating) {
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            particles.forEach((p, i) => {
+                if (p.alpha > 0) { 
+                    p.update(); 
+                    p.draw(); 
+                } else { 
+                    particles.splice(i, 1); 
+                }
+            });
+        }
+
+        function ignite() {
+            const welcome = document.getElementById('welcome-ui');
+            const initialBg = document.getElementById('initial-bg');
+            const card = document.getElementById('eid-card');
+            const scene = document.getElementById('night-scene');
+            const finalBg = document.getElementById('final-bg');
+            
+            welcome.style.opacity = '0';
+            initialBg.style.opacity = '0';
+            
+            setTimeout(() => {
+                welcome.style.display = 'none';
+                
+                scene.style.opacity = '1';
+                isCelebrating = true;
+                renderLoop();
+                
+                const fireworksInterval = setInterval(() => {
+                    if(isCelebrating) createExplosion();
+                    else clearInterval(fireworksInterval);
+                }, 500);
+                
+                setTimeout(() => {
+                    isCelebrating = false;
+                    scene.style.opacity = '0';
+                    finalBg.style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        card.style.display = 'block';
+                        setTimeout(() => card.classList.add('active'), 100);
+                    }, 1000);
+                }, 7000); 
+            }, 500);
+        }
+    </script>
+</body>
+</html>
