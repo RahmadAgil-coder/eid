@@ -36,7 +36,7 @@
             height: 100%;
             background-color: #fdfbf7;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23d4af37' fill-opacity='0.05'%3E%3Cpath d='M40 0l10 30 30 10-30 10-10 30-10-30-30-10 30-10z'/%3E%3C/g%3E%3C/svg%3E");
-            z-index: 5;
+            z-index: 1;
             transition: opacity 1s ease;
         }
 
@@ -47,7 +47,7 @@
             width: 100%;
             height: 100%;
             background: var(--night-sky);
-            z-index: 40;
+            z-index: 2;
             opacity: 0;
             pointer-events: none;
             transition: opacity 1s ease;
@@ -61,7 +61,7 @@
             width: 100%;
             height: 100%;
             background: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
-            z-index: 1;
+            z-index: 0;
             opacity: 0;
             transition: opacity 1.5s ease;
         }
@@ -105,7 +105,7 @@
             top: 0; left: 0;
             width: 100%; height: 100%;
             pointer-events: none;
-            z-index: 60; 
+            z-index: 50; 
         }
 
         .btn-elegant {
@@ -120,10 +120,42 @@
             box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.3);
             border: none;
             position: relative;
-            z-index: 120;
+            z-index: 150;
         }
 
         .btn-elegant:hover { transform: scale(1.05); filter: brightness(1.1); }
+
+        /* Gaya Khusus Tombol Suara yang Serasi */
+        .btn-audio {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 200;
+            background: var(--emerald);
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.4);
+            border: none;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        .btn-audio.visible {
+            display: flex;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .btn-audio:hover {
+            transform: scale(1.1);
+            filter: brightness(1.1);
+        }
 
         .font-arabic { font-family: 'Cinzel Decorative', cursive; }
         .font-cursive { font-family: 'Great Vibes', cursive; }
@@ -159,11 +191,17 @@
 
     <canvas id="fireworks-canvas"></canvas>
 
+    <!-- Tombol Kontrol Suara (Versi Elegant) -->
+    <button id="audio-control" class="btn-audio" onclick="toggleAudio()" title="Kontrol Suara">
+        <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+        <svg id="icon-sound-off" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+    </button>
+
     <div id="welcome-ui" class="text-center z-[110] relative transition-opacity duration-500">
         <div class="mb-6 text-7xl animate-bounce">🕌</div>
         <h2 class="text-sm tracking-[0.4em] text-slate-500 uppercase mb-10 font-semibold">Menyambut Idul Fitri</h2>
         <button onclick="ignite()" class="btn-elegant">BUKA UCAPAN</button>
-        <p class="text-[10px] mt-4 text-slate-400 uppercase tracking-widest">Gunakan Volume Suara</p>
+        <p class="text-[10px] mt-4 text-slate-400 uppercase tracking-widest italic">Nyalakan volume untuk pengalaman terbaik</p>
     </div>
 
     <div id="eid-card" class="card p-10 md:p-14 text-center">
@@ -182,14 +220,18 @@
         </div>
     </div>
 
+    <!-- Musik Latar (Instrumen Tenang) -->
     <audio id="bg-music" loop>
         <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
     </audio>
 
     <script>
         let isCelebrating = false;
+        let isMuted = false;
         const canvas = document.getElementById('fireworks-canvas');
         const ctx = canvas.getContext('2d');
+        const music = document.getElementById('bg-music');
+        const audioBtn = document.getElementById('audio-control');
         let particles = [];
         let audioCtx;
 
@@ -199,40 +241,36 @@
             }
         }
 
+        function toggleAudio() {
+            isMuted = !isMuted;
+            music.muted = isMuted;
+            document.getElementById('icon-sound-on').classList.toggle('hidden', isMuted);
+            document.getElementById('icon-sound-off').classList.toggle('hidden', !isMuted);
+            
+            // Memberikan feedback visual sedikit saat diklik
+            audioBtn.style.transform = 'scale(0.9)';
+            setTimeout(() => audioBtn.style.transform = 'scale(1)', 100);
+        }
+
         function playFireworkSound() {
-            if (!audioCtx) return;
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
+            if (!audioCtx || isMuted) return;
+            try {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
 
-            oscillator.type = 'sawtooth';
-            oscillator.frequency.setValueAtTime(100, audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(100, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
 
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
 
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
 
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.5);
-
-            const noiseNode = audioCtx.createBufferSource();
-            const bufferSize = audioCtx.sampleRate * 0.1;
-            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = Math.random() * 2 - 1;
-            }
-            noiseNode.buffer = buffer;
-
-            const noiseGain = audioCtx.createGain();
-            noiseGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            noiseGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-
-            noiseNode.connect(noiseGain);
-            noiseGain.connect(audioCtx.destination);
-            noiseNode.start();
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.5);
+            } catch (e) { console.log("Sound error"); }
         }
 
         function resize() {
@@ -309,9 +347,11 @@
 
         function ignite() {
             initAudio();
-            const music = document.getElementById('bg-music');
             music.volume = 0.3;
-            music.play().catch(e => console.log("Autoplay blocked"));
+            music.play().catch(e => console.log("Audio play blocked by browser"));
+            
+            // Menampilkan tombol audio dengan animasi
+            audioBtn.classList.add('visible');
 
             const welcome = document.getElementById('welcome-ui');
             const initialBg = document.getElementById('initial-bg');
